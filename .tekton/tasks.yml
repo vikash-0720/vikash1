@@ -1,0 +1,28 @@
+
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: python-cleanup-test
+spec:
+  workspaces:
+    - name: source
+  steps:
+    - name: cleanup
+      image: alpine:3.20
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/sh
+        echo "Starting cleanup task..."
+        rm -rf .pytest_cache __pycache__
+        echo "Cleanup completed successfully"
+
+    - name: test
+      image: python:3.11
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/sh
+        set -e
+        echo "Installing test dependencies..."
+        pip install nose
+        echo "Running unit tests..."
+        nosetests -v
